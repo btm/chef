@@ -70,6 +70,7 @@ class Chef
     class CookbookVersionNameMismatch < ArgumentError; end
     class MissingParentDirectory < RuntimeError; end
     class UnresolvableGitReference < RuntimeError; end
+    class NodeNotFound < RuntimeError; end
     class InvalidEnvironmentRunListSpecification < ArgumentError; end
     class InvalidDataBagItemID < ArgumentError; end
     class InvalidDataBagName < ArgumentError; end

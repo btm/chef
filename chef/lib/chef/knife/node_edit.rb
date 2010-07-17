@@ -17,6 +17,9 @@
 #
 
 require 'chef/knife'
+require 'chef/node'
+require 'chef/search/query'
+require 'chef/json_compat'
 
 class Chef
   class Knife
@@ -44,12 +47,23 @@ class Chef
           exit 1
         end
 
-        updated_node = node_editor.edit_node
-        if updated_values = node_editor.updated?
-          ui.info "Saving updated #{updated_values.join(', ')} on node #{node.name}"
-          updated_node.save
-        else
-          ui.info "Node not updated, skipping node save"
+        begin
+          edit_object(Chef::Node, @node_name)
+        rescue Chef::Exceptions::NodeNotFound
+          # We didn't find it, look for a node with the name set
+          # to what we've been asked to edit
+          begin
+            q = Chef::Search::Query.new
+            nodes = q.search(:node, "name:#{@node_name}*")
+            if nodes[0].length == 1
+              edit_object(Chef::Node, nodes[0][0].name)
+            else
+              node = ask_select_option("Which node do you want to edit?", nodes[0])
+              edit_object(Chef::Node, node.name)
+            end
+          rescue NoMethodError
+            raise Chef::Exceptions::NodeNotFound, "Node #{@node_name} not found"
+          end
         end
       end
 

@@ -601,6 +601,8 @@ class Chef
     # Load a node by name
     def self.load(name)
       Chef::REST.new(Chef::Config[:chef_server_url]).get_rest("nodes/#{name}")
+    rescue Net::HTTPServerException
+      raise Chef::Exceptions::NodeNotFound, "could not find node #{name}"
     end
 
     # Remove this node from the CouchDB
