@@ -60,7 +60,7 @@ Removing any system startup links for /etc/init.d/chef ...
     end
 
     it "says the service is enabled" do
-      @provider.service_currently_enabled?.should be_true
+      @provider.service_currently_enabled?(@provider.get_priority).should be_true
     end
 
     it "stores the 'enabled' state" do
@@ -93,7 +93,7 @@ Removing any system startup links for /etc/init.d/chef ...
     end
 
     it "says the service is disabled" do
-      @provider.service_currently_enabled?.should be_false
+      @provider.service_currently_enabled?(@provider.get_priority).should be_false
     end
 
     it "stores the 'disabled' state" do
@@ -110,7 +110,7 @@ Removing any system startup links for /etc/init.d/chef ...
     end
 
     it "raises an error" do
-      lambda { @provider.service_currently_enabled? }.should raise_error(Chef::Exceptions::Service)
+      lambda { @provider.service_currently_enabled?(@provider.get_priority) }.should raise_error(Chef::Exceptions::Service)
     end
 
   end
