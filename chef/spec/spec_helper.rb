@@ -143,7 +143,9 @@ def platform_mock(platform = :unix, &block)
   Chef::Platform.stub!(:windows?).and_return(platform == :windows ? true : false)
   ENV['SYSTEMDRIVE'] = (platform == :windows ? 'C:' : nil)
   if block_given?
-    with_constants :RUBY_PLATFORM => (platform == :windows ? 'i386-mingw32' : 'x86_64-darwin11.2.0') do
+    with_constants ({ "RUBY_PLATFORM" => (platform == :windows ? 'i386-mingw32' : 'x86_64-darwin11.2.0'),
+                    "File::PATH_SEPARATOR" => (platform == :windows ? ";" : ":"),
+                    "File::ALT_SEPARATOR" => (platform == :windows ? "\\" : nil) }) do
       yield
     end
   end
