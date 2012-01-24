@@ -92,22 +92,45 @@ ensure
   $VERBOSE = old_verbose
 end
 
-# http://digitaldumptruck.jotabout.com/?p=551
+# http://missingbit.blogspot.com/2011/07/stubbing-constants-in-rspec_20.html
+def parse_constant(constant)
+  source, _, constant_name = constant.to_s.rpartition('::')
+
+  [constantize(source), constant_name]
+end
+
 def with_constants(constants, &block)
   saved_constants = {}
   constants.each do |constant, val|
-    saved_constants[ constant ] = Object.const_get( constant )
-    with_warnings(nil) { Object.const_set( constant, val ) }
+    source_object, const_name = parse_constant(constant)
+
+    saved_constants[constant] = source_object.const_get(const_name)
+    with_warnings(nil) {source_object.const_set(const_name, val) }
   end
+
   begin
     block.call
   ensure
     constants.each do |constant, val|
-      with_warnings(nil) { Object.const_set( constant, saved_constants[ constant ] ) }
+      source_object, const_name = parse_constant(constant)
+
+      with_warnings(nil) { source_object.const_set(const_name, saved_constants[constant]) }
     end
   end
 end
 ####################
+
+# File activesupport/lib/active_support/inflector/methods.rb, line 209
+def constantize(camel_cased_word)
+  names = camel_cased_word.split('::')
+  names.shift if names.empty? || names.first.empty?
+
+  constant = Object
+  names.each do |name|
+    constant = constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
+  end
+  constant
+end
 
 # makes Chef think it's running on a certain platform..useful for unit testing
 # platform-specific functionality.
