@@ -86,7 +86,8 @@ describe Chef::Knife::Configure do
     @knife.config[:initial] = true
     @knife.ask_user_for_config
     @out.string.should match(Regexp.escape("Please enter the location of the existing admin client's private key: [/etc/chef/webui.pem]"))
-    @knife.admin_client_key.should == '/etc/chef/webui.pem'
+    let(:expected_key_path) { windows? ? 'C:\chef\webui.pem' : '/etc/chef/webui.pem' }
+    @knife.admin_client_key.should == expected_key_path
   end
 
   it "should not ask the user for the location of the existing admin key if -i and --admin_client_key are specified" do
@@ -100,7 +101,8 @@ describe Chef::Knife::Configure do
   it "should not ask the user for the location of the existing admin key if -i is not specified" do
     @knife.ask_user_for_config
     @out.string.should_not match(Regexp.escape("Please enter the location of the existing admin client's private key: [/etc/chef/webui.pem]"))
-    @knife.admin_client_key.should_not == '/etc/chef/webui.pem'
+    let(:expected_key_path) { windows? ? 'C:\chef\webui.pem' : '/etc/chef/webui.pem' }
+    @knife.admin_client_key.should_not == expected_key_path
   end
 
   it "asks the user for the location of a chef repo" do
@@ -125,7 +127,8 @@ describe Chef::Knife::Configure do
   it "asks the users for the location of the validation key" do
     @knife.ask_user_for_config
     @out.string.should match(Regexp.escape("Please enter the location of the validation key: [/etc/chef/validation.pem]"))
-    @knife.validation_key.should == '/etc/chef/validation.pem'
+    let(:expected_key_path) { windows? ? 'C:\chef\validation.pem' : '/etc/chef/validation.pem' }
+    @knife.validation_key.should == expected_key_path
   end
 
   it "should not ask the users for the location of the validation key if --validation_key is specified" do

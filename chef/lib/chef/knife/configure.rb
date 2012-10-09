@@ -123,7 +123,7 @@ EOH
       def ask_user_for_config_path
         config[:config_file] ||= ask_question("Where should I put the config file? ", :default => "#{Chef::Config[:user_home]}/.chef/knife.rb")
         # have to use expand path to expand the tilde character to the user's home
-        config[:config_file] = File.expand_path(config[:config_file])
+        config[:config_file] = Chef::Config.platform_specific_path(config[:config_file])
         if File.exists?(config[:config_file])
           confirm("Overwrite #{config[:config_file]}")
         end
@@ -136,17 +136,17 @@ EOH
           @new_client_name        = config[:node_name] || ask_question("Please enter a clientname for the new client: ", :default => Etc.getlogin)
           @admin_client_name      = config[:admin_client_name] || ask_question("Please enter the existing admin clientname: ", :default => 'chef-webui')
           @admin_client_key       = config[:admin_client_key] || ask_question("Please enter the location of the existing admin client's private key: ", :default => '/etc/chef/webui.pem')
-          @admin_client_key       = File.expand_path(@admin_client_key)
+          @admin_client_key       = Chef::Config.platform_specific_path(@admin_client_key)
         else
           @new_client_name        = config[:node_name] || ask_question("Please enter an existing username or clientname for the API: ", :default => Etc.getlogin)
         end
         @validation_client_name = config[:validation_client_name] || ask_question("Please enter the validation clientname: ", :default => 'chef-validator')
         @validation_key         = config[:validation_key] || ask_question("Please enter the location of the validation key: ", :default => '/etc/chef/validation.pem')
-        @validation_key         = File.expand_path(@validation_key)
+        @validation_key         = Chef::Config.platform_specific_path(@validation_key)
         @chef_repo              = config[:repository] || ask_question("Please enter the path to a chef repository (or leave blank): ")
 
         @new_client_key = config[:client_key] || File.join(chef_config_path, "#{@new_client_name}.pem")
-        @new_client_key = File.expand_path(@new_client_key)
+        @new_client_key = Chef::Config.platform_specific_path(@new_client_key)
       end
 
       def guess_servername
