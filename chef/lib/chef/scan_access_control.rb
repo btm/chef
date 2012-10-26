@@ -40,6 +40,14 @@ class Chef
     attr_reader :new_resource
     attr_reader :current_resource
 
+    if RUBY_PLATFORM =~ /mswin|mingw|windows/
+      require 'chef/scan_access_control/windows'
+      include ScanAccessControl::Windows
+    else
+      require 'chef/scan_access_control/unix'
+      include ScanAccessControl::Unix
+    end
+
     def initialize(new_resource, current_resource)
       @new_resource, @current_resource = new_resource, current_resource
     end
@@ -49,7 +57,7 @@ class Chef
       if ::File.exist?(new_resource.path)
         set_owner
         set_group
-        set_mode
+        set_mode unless Chef::Platform.windows?
       else
         # leave the values as nil.
       end
@@ -63,73 +71,13 @@ class Chef
       @current_resource.owner(current_owner)
     end
 
-    def current_owner
-      case new_resource.owner
-      when String, nil
-        lookup_uid
-      when Integer
-        stat.uid
-      else
-        Chef::Log.error("The `owner` parameter of the #@new_resource resource is set to an invalid value (#{new_resource.owner.inspect})")
-        raise ArgumentError, "cannot resolve #{new_resource.owner.inspect} to uid, owner must be a string or integer"
-      end
-    end
-
-    def lookup_uid
-      unless (pwent = Etc.getpwuid(stat.uid)).nil?
-        pwent.name
-      else
-        stat.uid
-      end
-    rescue ArgumentError
-      stat.uid
-    end
-
     # Set the group attribute of +current_resource+ to whatever the current state is.
     def set_group
       @current_resource.group(current_group)
     end
 
-    def current_group
-      case new_resource.group
-      when String, nil
-        lookup_gid
-      when Integer
-        stat.gid
-      else
-        Chef::Log.error("The `group` parameter of the #@new_resource resource is set to an invalid value (#{new_resource.owner.inspect})")
-        raise ArgumentError, "cannot resolve #{new_resource.group.inspect} to gid, group must be a string or integer"
-      end
-    end
-
-    def lookup_gid
-      unless (pwent = Etc.getgrgid(stat.gid)).nil?
-        pwent.name
-      else
-        stat.gid
-      end
-    rescue ArgumentError
-      stat.gid
-    end
-
     def set_mode
       @current_resource.mode(current_mode)
-    end
-
-    def current_mode
-      case new_resource.mode
-      when String, nil
-        (stat.mode & 007777).to_s(8)
-      when Integer
-        stat.mode & 007777
-      else
-        Chef::Log.error("The `mode` parameter of the #@new_resource resource is set to an invalid value (#{new_resource.mode.inspect})")
-        raise ArgumentError, "Invalid value #{new_resource.mode.inspect} for `mode` on resource #@new_resource"
-      end
-    end
-
-    def stat
-      @stat ||= @new_resource.instance_of?(Chef::Resource::Link) ? ::File.lstat(@new_resource.path) : ::File.stat(@new_resource.path)
     end
   end
 end

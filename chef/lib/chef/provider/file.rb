@@ -135,41 +135,27 @@ class Chef
             @current_resource.checksum(checksum(@new_resource.path))
           end
         end
-        load_current_resource_attrs
         setup_acl
         
         @current_resource
       end
 
-      def load_current_resource_attrs
-        if Chef::Platform.windows?
-          # TODO: To work around CHEF-3554, add support for Windows
-          # equivalent, or implicit resource reporting won't work for
-          # Windows.
-          return
-        end
-
-        if ::File.exist?(@new_resource.path)
-          stat = ::File.stat(@new_resource.path)
-          @current_resource.owner(stat.uid)
-          @current_resource.mode(stat.mode & 07777)
-          @current_resource.group(stat.gid)
-
-          if @new_resource.group.nil?
-            @new_resource.group(@current_resource.group)
-          end 
-          if @new_resource.owner.nil?
-            @new_resource.owner(@current_resource.owner)
-          end
-          if @new_resource.mode.nil?
-            @new_resource.mode(@current_resource.mode)
-          end
-        end
-      end
       
       def setup_acl
+        puts "setup_acl owner: #{current_resource.owner}"
         @acl_scanner = ScanAccessControl.new(@new_resource, @current_resource)
         @acl_scanner.set_all!
+        puts "setup_acl owner: #{current_resource.owner}"
+
+        if @new_resource.group.nil?
+          @new_resource.group(@current_resource.group) unless Chef::Platform.windows?
+        end 
+        if @new_resource.owner.nil?
+          @new_resource.owner(@current_resource.owner)
+        end
+        if @new_resource.mode.nil?
+          @new_resource.mode(@current_resource.mode)
+        end
       end
 
       def define_resource_requirements

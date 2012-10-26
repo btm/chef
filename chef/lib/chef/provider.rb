@@ -105,7 +105,9 @@ class Chef
         events.resource_current_state_load_bypassed(@new_resource, @action, @current_resource)
       end
 
+puts "run_action (pre-define): #{Chef::ReservedNames::Win32::Security.get_named_security_info(@current_resource.path).group}" if ::File.exists?(@current_resource.path)
       define_resource_requirements
+puts "run_action (pre-process): #{Chef::ReservedNames::Win32::Security.get_named_security_info(@current_resource.path).group}" if ::File.exists?(@current_resource.path)
       process_resource_requirements
 
       # user-defined providers including LWRPs may 
@@ -122,8 +124,9 @@ class Chef
       else
         send("action_#{@action}")
       end
+puts "run_action (pre-converge): #{Chef::ReservedNames::Win32::Security.get_named_security_info(@current_resource.path).group}" if ::File.exists?(@current_resource.path)
       converge
-
+puts "run_action (post-converge): #{Chef::ReservedNames::Win32::Security.get_named_security_info(@current_resource.path).group}" if ::File.exists?(@current_resource.path)
       cleanup_after_converge
     end
 

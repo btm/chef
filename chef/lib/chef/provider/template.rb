@@ -61,9 +61,12 @@ class Chef
             description << diff_current(rendered_template.path)
             converge_by(description) do
               backup
+              puts "converge_by (pre-mv): #{Chef::ReservedNames::Win32::Security.get_named_security_info(@current_resource.path).group}" if ::File.exists?(@current_resource.path)
               FileUtils.mv(rendered_template.path, @new_resource.path)
+              puts "converge_by (post-mv): #{Chef::ReservedNames::Win32::Security.get_named_security_info(@current_resource.path).group}" if ::File.exists?(@current_resource.path)
               Chef::Log.info("#{@new_resource} updated content")
               access_controls.set_all!
+              puts "converge_by (post-set): #{Chef::ReservedNames::Win32::Security.get_named_security_info(@current_resource.path).group}" if ::File.exists?(@current_resource.path)
               stat = ::File.stat(@new_resource.path)
 
               # template depends on the checksum not changing, and updates it

@@ -148,6 +148,7 @@ class Chef
       end
 
       def set_group!
+        puts "in set_group!"
         if (group = target_group)
           Chef::Log.info("#{log_string} group changed to #{group}")
           securable_object.group = group
@@ -293,7 +294,9 @@ class Chef
       end
 
       def target_group
+        puts "in target_group"
         return nil if resource.group.nil?
+        puts "past nil in target_group"
         sid = get_sid(resource.group)
       end
 

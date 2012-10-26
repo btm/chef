@@ -372,6 +372,7 @@ shared_examples_for "a securable resource" do
       it 'warns when mode tries to set owner bits but owner is not specified' do
         @warn = []
         Chef::Log.stub!(:warn) { |msg| @warn << msg }
+ #       ::File.stub(:exist?).with(/#{path}/).and_return(false)
 
         resource.mode 0400
         resource.run_action(:create)
@@ -382,6 +383,7 @@ shared_examples_for "a securable resource" do
       it 'warns when mode tries to set group bits but group is not specified' do
         @warn = []
         Chef::Log.stub!(:warn) { |msg| @warn << msg }
+#        ::File.stub(:exist?).with(/#{path}/).and_return(false)
 
         resource.mode 0040
         resource.run_action(:create)
